@@ -35,7 +35,8 @@ class HTML2Kirby(HTMLParser):
             'p': 'p',
             'a': 'a',
             'ul': 'ul',
-            'li': 'li'
+            'li': 'li',
+            'ol': 'ol'
         }
 
     def _reset(self):
@@ -232,4 +233,13 @@ class HTML2Kirby(HTMLParser):
         state = self.state_end()
 
         self.o("* " + state.get('data', '').strip())
+        self.o("\n")
+
+    def process_start_ol(self, tag, attrs):
+        self.state_start(tag, attrs)
+
+    def process_end_ol(self, tag):
+        state = self.state_end()
+
+        self.o("1. " + state.get('data', '').strip())
         self.o("\n")

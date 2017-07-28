@@ -123,3 +123,15 @@ def test_complicated_lists(formatter):
 * Second item has a (link:  text: Link)"""
 
     assert exp == formatter.markdown.strip()
+
+
+def test_ordered_list(formatter):
+    formatter.feed("""
+        <ul>
+            <ol>First item</ol>
+            <ol>Second item</ol>
+        </ul>
+    """)
+
+    exp = "1. First item\n1. Second item"
+    assert exp == formatter.markdown.strip()
