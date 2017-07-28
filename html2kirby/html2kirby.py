@@ -268,8 +268,8 @@ class HTML2Kirby(HTMLParser):
 
     def process_start_pre(self, tag, attrs):
         self.p()
-        self.o('```')
+        self.o('```\n')
 
     def process_end_pre(self, tag):
-        self.o('```')
+        self.o('\n```')
         self.p()
