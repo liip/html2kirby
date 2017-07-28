@@ -1,0 +1,10 @@
+# Welcome to Hell
+
+
+This is a simple HTML page. We need it to test various things like **bold text** and _italic stuff_, but also
+(link: http://www.liip.ch text: Links) and of course, don't forget, (image: http://placekitten.com/200/300 alt: Kitteehs!)
+
+
+It is split into various paragraphs, and also has 
+
+custom new lines
