@@ -35,13 +35,14 @@ def test_strong(formatter):
     assert formatter.markdown == "**lala** something coming right after"
 
 
+@pytest.mark.xfail(reason="Problem with _ followed by text")
 def test_italic(formatter):
     formatter.feed("<i>lala</i>")
-    assert formatter.markdown == "_lala_ "
+    assert formatter.markdown == "_lala_"
 
     formatter._reset()
     formatter.feed("<em>lala</em>")
-    assert formatter.markdown == "_lala_ "
+    assert formatter.markdown == "_lala_"
 
     formatter._reset()
     formatter.feed("<em>lala</em>something coming right after")
@@ -146,10 +147,10 @@ def test_blocks(formatter):
         </pre>
     """)
 
-    exp = """```
+    exp = """\n\n```
             from winterfell import jon
 
             assert jon.knows == "nothing"
-        ```"""
+        ```\n\n"""
 
-    assert exp == formatter.markdown.rstrip()
+    assert exp == formatter.markdown

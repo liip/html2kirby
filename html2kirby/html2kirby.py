@@ -124,6 +124,26 @@ class HTML2Kirby(HTMLParser):
         """
         return self.states.pop()
 
+    def p(self):
+        """Create blank lines
+
+        Create blank lines, but only if they don't exist. This makes sure that
+        in the right places, there are two new lines
+        """
+        if len(self.states) == 0:
+            if not self.markdown.endswith("\n\n"):
+                if self.markdown.endswith("\n"):
+                    self.markdown += "\n"
+                else:
+                    self.markdown += "\n\n"
+        else:
+            last = self.states[-1]
+            if not last['data'].endswith("\n\n"):
+                if last['data'].endswith("\n"):
+                    last['data'] += "\n"
+                else:
+                    last['data'] += "\n\n"
+
     def o(self, data):
         """Append data to the result or state
 
@@ -131,13 +151,15 @@ class HTML2Kirby(HTMLParser):
         append it to the current state
         """
         if len(self.states) == 0:
+            if self.markdown.endswith(' ') and data.startswith(' '):
+                data = data.lstrip()
             self.markdown += data
         else:
             self.state_add_data(data)
 
     def br(self):
         """Newlines!"""
-        self.o("\n\n")
+        self.p()
 
     def process_start_br(self, tag, attrs):
         self.br()
@@ -159,12 +181,19 @@ class HTML2Kirby(HTMLParser):
         self.o(img)
 
     def process_start_heading(self, tag, attrs):
+        self.state_start(tag, attrs)
+
+    def process_end_heading(self, tag):
+        state = self.state_end()
+
+        tag = state['tag']
+        data = state['data'].strip()
+
         nr = int("".join(c for c in tag if c.isdigit()))
         self.o("#" * nr)
         self.o(" ")
-
-    def process_end_heading(self, tag):
-        self.br()
+        self.o(data)
+        self.p()
 
     def process_start_strong(self, tag, attrs):
         self.tag_pad()
@@ -180,13 +209,12 @@ class HTML2Kirby(HTMLParser):
 
     def process_end_emph(self, tag):
         self.o('_')
-        self.tag_pad()
 
     def process_start_p(self, tag, attrs):
-        self.o("\n\n")
+        self.p()
 
     def process_end_p(self, tag):
-        self.o("\n\n")
+        self.p()
 
     def process_start_a(self, tag, attrs):
         self.state_start(tag, attrs)
@@ -220,7 +248,7 @@ class HTML2Kirby(HTMLParser):
         indent = " " * 4 * nest_level
 
         if nest_level == 0:
-            self.br()
+            self.p()
         else:
             self.o("\n")
 
@@ -239,7 +267,9 @@ class HTML2Kirby(HTMLParser):
         self.o("\n")
 
     def process_start_pre(self, tag, attrs):
+        self.p()
         self.o('```')
 
     def process_end_pre(self, tag):
         self.o('```')
+        self.p()
