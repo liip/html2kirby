@@ -2,7 +2,8 @@ import logging
 
 from html.parser import HTMLParser
 
-__all__ = ['HTML2Kirby']
+__all__ = ["HTML2Kirby"]
+
 
 class HTML2Kirby(HTMLParser):
     def __init__(self, *args, **kwargs):
@@ -32,7 +33,9 @@ class HTML2Kirby(HTMLParser):
             'i': 'emph',
             'em': 'emph',
             'p': 'p',
-            'a': 'a'
+            'a': 'a',
+            'ul': 'ul',
+            'li': 'li'
         }
 
     def _reset(self):
@@ -64,13 +67,16 @@ class HTML2Kirby(HTMLParser):
     def handle_data(self, data):
         """Handle data
 
+        If it's just whitespace data, discard it.
         If we're just plain rewriting, append the data to the result.
         If we have some sort of state, append the data to that state.
         """
+        if len(data.strip()) == 0:
+            return
         if len(self.states) == 0:
             self.o(data)
         else:
-            self.state_add_data(data)
+            self.state_add_data(data.strip())
 
     def tag_pad(self):
         """Pad a tag
@@ -78,11 +84,17 @@ class HTML2Kirby(HTMLParser):
         Put whitespace around tags, but not at the beginning of the
         string or line. This is necessary with some tags as _
         """
-        if self.markdown == '' or self.markdown[-1] == "\n":
-            return
+        if len(self.states):
+            last = self.states[-1]
 
-        if not self.markdown.endswith(' '):
-            self.o(' ')
+            if not last['data'].endswith(' '):
+                last['data'] += ' '
+        else:
+            if self.markdown == '' or self.markdown[-1] == "\n":
+                return
+
+            if not self.markdown.endswith(' '):
+                self.o(' ')
 
     def state_start(self, tag, attrs):
         """Record a state
@@ -190,4 +202,34 @@ class HTML2Kirby(HTMLParser):
             href=href, title=title, text=text
         )
 
+        self.tag_pad()
         self.o(link)
+
+    def process_start_ul(self, tag, attrs):
+        nest_level = len([s for s in self.states if s['tag'] == 'ul'])
+
+        attrs.append(('nest_level', nest_level))
+        self.state_start(tag, attrs)
+
+    def process_end_ul(self, tag):
+        state = self.state_end()
+
+        nest_level = state['attrs']['nest_level']
+        indent = " " * 4 * nest_level
+
+        if nest_level == 0:
+            self.br()
+        else:
+            self.o("\n")
+
+        for line in state.get('data').split("\n"):
+            self.o(indent + line + "\n")
+
+    def process_start_li(self, tag, attrs):
+        self.state_start(tag, attrs)
+
+    def process_end_li(self, tag):
+        state = self.state_end()
+
+        self.o("* " + state.get('data', '').strip())
+        self.o("\n")
