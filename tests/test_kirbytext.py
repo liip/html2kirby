@@ -135,3 +135,21 @@ def test_ordered_list(formatter):
 
     exp = "1. First item\n1. Second item"
     assert exp == formatter.markdown.strip()
+
+
+def test_blocks(formatter):
+    formatter.feed("""
+        <pre>
+            from winterfell import jon
+
+            assert jon.knows == "nothing"
+        </pre>
+    """)
+
+    exp = """```
+            from winterfell import jon
+
+            assert jon.knows == "nothing"
+        ```"""
+
+    assert exp == formatter.markdown.rstrip()
