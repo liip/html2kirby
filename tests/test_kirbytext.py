@@ -127,10 +127,10 @@ def test_complicated_lists(formatter):
 
 def test_ordered_list(formatter):
     formatter.feed("""
-        <ul>
-            <ol>First item</ol>
-            <ol>Second item</ol>
-        </ul>
+        <ol>
+            <li>First item</li>
+            <li>Second item</li>
+        </ol>
     """)
 
     exp = "1. First item\n1. Second item"

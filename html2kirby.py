@@ -34,9 +34,10 @@ class HTML2Kirby(HTMLParser):
             'em': 'emph',
             'p': 'p',
             'a': 'a',
-            'ul': 'ul',
+            'ul': 'list',
+            'ol': 'list',
             'li': 'li',
-            'ol': 'ol'
+            'pre': 'pre'
         }
 
     def _reset(self):
@@ -206,13 +207,13 @@ class HTML2Kirby(HTMLParser):
         self.tag_pad()
         self.o(link)
 
-    def process_start_ul(self, tag, attrs):
+    def process_start_list(self, tag, attrs):
         nest_level = len([s for s in self.states if s['tag'] == 'ul'])
 
         attrs.append(('nest_level', nest_level))
         self.state_start(tag, attrs)
 
-    def process_end_ul(self, tag):
+    def process_end_list(self, tag):
         state = self.state_end()
 
         nest_level = state['attrs']['nest_level']
@@ -232,14 +233,7 @@ class HTML2Kirby(HTMLParser):
     def process_end_li(self, tag):
         state = self.state_end()
 
-        self.o("* " + state.get('data', '').strip())
-        self.o("\n")
+        sign = '*' if self.states[-1]['tag'] == 'ul' else '1.'
 
-    def process_start_ol(self, tag, attrs):
-        self.state_start(tag, attrs)
-
-    def process_end_ol(self, tag):
-        state = self.state_end()
-
-        self.o("1. " + state.get('data', '').strip())
+        self.o(sign + " " + state.get('data', '').strip())
         self.o("\n")
