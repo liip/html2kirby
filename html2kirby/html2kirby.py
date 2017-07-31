@@ -26,7 +26,8 @@ class HTML2Kirby(HTMLParser):
         'li': 'li',
         'code': 'pre',
         'pre': 'pre',
-        'blockquote': 'quote'
+        'blockquote': 'quote',
+        'hr': 'hr'
     }
 
     keep_tags = [
@@ -349,4 +350,9 @@ class HTML2Kirby(HTMLParser):
         for line in data.split("\n"):
             self.o("> " + line.strip() + "\n")
 
+        self.p()
+
+    def process_start_hr(self, tag, attrs):
+        self.p()
+        self.o("***")
         self.p()

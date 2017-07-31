@@ -220,3 +220,11 @@ def test_apostrophe(formatter):
     exp = "I'm 'proud' to present one of the first swiss-made native iPhone applications, called ' **GottaGo** '"  # noqa: E501
 
     assert exp == formatter.kirbytext
+
+
+def test_horizontal_ruler(formatter):
+    formatter.feed("<hr>")
+
+    exp = "\n\n***\n\n"
+
+    assert exp == formatter.kirbytext
