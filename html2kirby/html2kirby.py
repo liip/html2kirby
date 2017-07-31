@@ -100,7 +100,12 @@ class HTML2Kirby(HTMLParser):
         if len(data.strip()) == 0:
             return
 
+        data = data.replace("’", "'")
+        data = data.replace("`", "'")
+
         data = unescape(data)
+
+        # those need to be replaced, as ` means code block in kirby
 
         if len(self.states) == 0:
             self.o(data)
