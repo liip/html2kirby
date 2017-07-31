@@ -70,6 +70,10 @@ class HTML2Kirby(HTMLParser):
             getattr(self, processor_func)(tag, attrs)
         elif tag in self.keep_tags:
             self.keep_start_tag(tag, attrs)
+        else:
+            print("Ignored tag {} with attrs {}".format(
+                tag, ",".join(["{}: {}".format(*a) for a in attrs])
+            ))
 
     def handle_endtag(self, tag):
         """Handle the starttag
