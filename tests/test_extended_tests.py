@@ -27,4 +27,4 @@ def test_file(html, kirby):
     with open(kirby, 'r') as kirby_file:
         expected_result = kirby_file.read()
 
-    assert formatter.markdown.strip() == expected_result.strip()
+    assert formatter.kirbytext.strip() == expected_result.strip()

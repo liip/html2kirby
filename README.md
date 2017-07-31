@@ -21,10 +21,10 @@ formatter = HTML2Kirby()
 formatter.feed("""<img src="https://placekitten.com/200/300" alt="kittens are cute" />""")
 ```
 
-You can then access the result via `.markdown` attribute:
+You can then access the result via `.kirbytext` attribute:
 
 ```
-print(formatter.markdown)
+print(formatter.kirbytext)
 # prints (image: https://placekitten.com/200/300 alt: kittesn are cute)
 ```
 

@@ -4,12 +4,12 @@ import pytest
 def test_img(formatter):
     formatter.feed('<img src="foo.jpg" alt="foobar" />')
 
-    assert formatter.markdown == "(image: foo.jpg alt: foobar)"
+    assert formatter.kirbytext == "(image: foo.jpg alt: foobar)"
 
     formatter._reset()
     formatter.feed('<img src="foo.jpg">')
 
-    assert formatter.markdown == "(image: foo.jpg)"
+    assert formatter.kirbytext == "(image: foo.jpg)"
 
 
 def test_linked_image(formatter):
@@ -17,7 +17,7 @@ def test_linked_image(formatter):
 
     exp = "(image: liiplogo.jpg link: http://liip.com)"
 
-    assert formatter.markdown == exp
+    assert formatter.kirbytext == exp
 
 
 @pytest.mark.parametrize("html,md", [
@@ -27,40 +27,40 @@ def test_linked_image(formatter):
 def test_headings(formatter, html, md):
     formatter.feed('<{tag}>Heading uno</{tag}>'.format(tag=html))
 
-    assert formatter.markdown == "{} Heading uno\n\n".format(md)
+    assert formatter.kirbytext == "{} Heading uno\n\n".format(md)
 
 
 def test_strong(formatter):
     formatter.feed("<b>lala</b>")
-    assert formatter.markdown == "**lala** "
+    assert formatter.kirbytext == "**lala** "
 
     formatter._reset()
     formatter.feed("<strong>lala</strong>")
-    assert formatter.markdown == "**lala** "
+    assert formatter.kirbytext == "**lala** "
 
     formatter._reset()
     formatter.feed("<strong>lala</strong>something coming right after")
-    assert formatter.markdown == "**lala** something coming right after"
+    assert formatter.kirbytext == "**lala** something coming right after"
 
 
 @pytest.mark.xfail(reason="Problem with _ followed by text")
 def test_italic(formatter):
     formatter.feed("<i>lala</i>")
-    assert formatter.markdown == "_lala_"
+    assert formatter.kirbytext == "_lala_"
 
     formatter._reset()
     formatter.feed("<em>lala</em>")
-    assert formatter.markdown == "_lala_"
+    assert formatter.kirbytext == "_lala_"
 
     formatter._reset()
     formatter.feed("<em>lala</em>something coming right after")
-    assert formatter.markdown == "_lala_ something coming right after"
+    assert formatter.kirbytext == "_lala_ something coming right after"
 
 
 def test_paragraph(formatter):
     formatter.feed("<p>some paragraph</p>")
 
-    assert formatter.markdown == "\n\nsome paragraph\n\n"
+    assert formatter.kirbytext == "\n\nsome paragraph\n\n"
 
 
 def test_link(formatter):
@@ -68,24 +68,24 @@ def test_link(formatter):
     Google</a>""")
 
     res = "(link: http://www.google.ch title: Alternative text: Google)"
-    assert formatter.markdown == res
+    assert formatter.kirbytext == res
 
     formatter._reset()
     formatter.feed("""<a href="http://www.google.ch">Google</a>""")
 
     res = "(link: http://www.google.ch text: Google)"
-    assert formatter.markdown == res
+    assert formatter.kirbytext == res
 
 
 def test_bold_link(formatter):
     formatter.feed("""<a href="foo"><b>bar</b></a>""")
 
-    assert formatter.markdown == "(link: foo text: **bar**)"
+    assert formatter.kirbytext == "(link: foo text: **bar**)"
 
     formatter._reset()
     formatter.feed("""<b><a href="foo">bar</a></b>""")
 
-    assert formatter.markdown == "** (link: foo text: bar)** "
+    assert formatter.kirbytext == "** (link: foo text: bar)** "
 
 
 def test_list(formatter):
@@ -97,7 +97,7 @@ def test_list(formatter):
     """)
 
     exp = "* First item\n* Second item"
-    assert exp == formatter.markdown.strip()
+    assert exp == formatter.kirbytext.strip()
 
 
 def test_nested_lists(formatter):
@@ -118,7 +118,7 @@ def test_nested_lists(formatter):
     * Second child item
 * Second item"""
 
-    assert exp == formatter.markdown.strip()
+    assert exp == formatter.kirbytext.strip()
 
 
 def test_complicated_lists(formatter):
@@ -131,7 +131,7 @@ def test_complicated_lists(formatter):
     exp = """* First **Item bold**
 * Second item has a (link:  text: Link)"""
 
-    assert exp == formatter.markdown.strip()
+    assert exp == formatter.kirbytext.strip()
 
 
 def test_ordered_list(formatter):
@@ -143,7 +143,7 @@ def test_ordered_list(formatter):
     """)
 
     exp = "1. First item\n1. Second item"
-    assert exp == formatter.markdown.strip()
+    assert exp == formatter.kirbytext.strip()
 
 
 def test_blocks(formatter):
@@ -168,7 +168,7 @@ def test_blocks(formatter):
 
 """
 
-    assert exp.strip() == formatter.markdown.strip()
+    assert exp.strip() == formatter.kirbytext.strip()
 
 
 def test_code(formatter):
@@ -176,7 +176,7 @@ def test_code(formatter):
 
     exp = "`git blame`"
 
-    assert exp == formatter.markdown
+    assert exp == formatter.kirbytext
 
 
 def test_quotes(formatter):
@@ -194,21 +194,21 @@ def test_quotes(formatter):
 
 """
 
-    assert exp == formatter.markdown
+    assert exp == formatter.kirbytext
 
 
 def test_keep_strike(formatter):
     code = """<strike>fu</strike>"""
     formatter.feed(code)
 
-    assert code == formatter.markdown
+    assert code == formatter.kirbytext
 
 
 def test_unescape(formatter):
     formatter.feed("GottaGo &#8211; iPhone bring me home")
 
     exp = "GottaGo – iPhone bring me home"
-    assert exp == formatter.markdown
+    assert exp == formatter.kirbytext
 
 
 def test_apostrophe(formatter):
@@ -219,4 +219,4 @@ def test_apostrophe(formatter):
 
     exp = "I'm 'proud' to present one of the first swiss-made native iPhone applications, called ' **GottaGo** '"  # noqa: E501
 
-    assert exp == formatter.markdown
+    assert exp == formatter.kirbytext

@@ -45,7 +45,7 @@ class HTML2Kirby(HTMLParser):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.markdown = ""
+        self.kirbytext = ""
         self.start_tag_handlers = [t for t in dir(self)
                                    if t.startswith("process_start_")]
 
@@ -128,10 +128,10 @@ class HTML2Kirby(HTMLParser):
             if not last['data'].endswith(' '):
                 last['data'] += ' '
         else:
-            if self.markdown == '' or self.markdown[-1] == "\n":
+            if self.kirbytext == '' or self.kirbytext[-1] == "\n":
                 return
 
-            if not self.markdown.endswith(' '):
+            if not self.kirbytext.endswith(' '):
                 self.o(' ')
 
     def state_start(self, tag, attrs):
@@ -167,11 +167,11 @@ class HTML2Kirby(HTMLParser):
         in the right places, there are two new lines
         """
         if len(self.states) == 0:
-            if not self.markdown.endswith("\n\n"):
-                if self.markdown.endswith("\n"):
-                    self.markdown += "\n"
+            if not self.kirbytext.endswith("\n\n"):
+                if self.kirbytext.endswith("\n"):
+                    self.kirbytext += "\n"
                 else:
-                    self.markdown += "\n\n"
+                    self.kirbytext += "\n\n"
         else:
             last = self.states[-1]
             if not last['data'].endswith("\n\n"):
@@ -187,9 +187,9 @@ class HTML2Kirby(HTMLParser):
         append it to the current state
         """
         if len(self.states) == 0:
-            if self.markdown.endswith(' ') and data.startswith(' '):
+            if self.kirbytext.endswith(' ') and data.startswith(' '):
                 data = data.lstrip()
-            self.markdown += data
+            self.kirbytext += data
         else:
             self.state_add_data(data)
 
