@@ -110,7 +110,11 @@ class HTML2Kirby(HTMLParser):
         if len(self.states) == 0:
             self.o(data)
         else:
-            self.state_add_data(data.strip())
+            if self.states[-1]['tag'] == 'li':
+                # special case here, the data of li needs to be stripped
+                # in order to work correctly
+                data = data.strip()
+            self.state_add_data(data)
 
     def tag_pad(self):
         """Pad a tag
@@ -318,12 +322,21 @@ class HTML2Kirby(HTMLParser):
         self.o("\n")
 
     def process_start_pre(self, tag, attrs):
-        self.p()
-        self.o('```')
+        self.state_start(tag, attrs)
 
     def process_end_pre(self, tag):
-        self.o('```')
-        self.p()
+        state = self.state_end()
+
+        if len(state['data'].split("\n")) > 1:
+            # multiline code
+            self.p()
+            self.o('```\n')
+            self.o(state['data'].rstrip().strip('\n'))
+            self.o('\n```')
+            self.p()
+
+        else:
+            self.o("`{}`".format(state['data'].strip()))
 
     def process_start_quote(self, tag, attrs):
         self.state_start(tag, attrs)
