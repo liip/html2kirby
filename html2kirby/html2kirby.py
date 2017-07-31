@@ -29,7 +29,7 @@ class HTML2Kirby(HTMLParser):
         'blockquote': 'quote'
     }
 
-    keep_tags = {
+    keep_tags = [
         'table',
         'tr',
         'td',
@@ -38,8 +38,9 @@ class HTML2Kirby(HTMLParser):
         'thead',
         'strike',
         'u',
-        'abbr'
-    }
+        'abbr',
+        'del'
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
