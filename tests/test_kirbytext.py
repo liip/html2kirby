@@ -12,6 +12,14 @@ def test_img(formatter):
     assert formatter.markdown == "(image: foo.jpg)"
 
 
+def test_linked_image(formatter):
+    formatter.feed('<a href="http://liip.com"><img src="liiplogo.jpg"></a>')
+
+    exp = "(image: liiplogo.jpg link: http://liip.com)"
+
+    assert formatter.markdown == exp
+
+
 @pytest.mark.parametrize("html,md", [
     ('h1', '#'), ('h2', '##'), ('h3', '###'),
     ('h4', '####'), ('h5', '#####'), ('h6', '######'),

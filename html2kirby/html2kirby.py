@@ -200,16 +200,22 @@ class HTML2Kirby(HTMLParser):
     def process_start_img(self, tag, attrs):
         attrs = dict(attrs)
 
-        if 'alt' not in attrs:
-            img = "(image: {src})".format(
-                src=attrs.get('src', '')
-            )
-            self.o(img)
-            return
+        link = ""
+        alt = ""
+        if len(self.states) and self.states[-1]['tag'] == 'a':
+            # we're in a link. Remove that and append the src in the image tag
+            link_state = self.state_end()
+            href = link_state['attrs'].get('href', '')
 
-        img = "(image: {src} alt: {alt})".format(
+            link = " link: " + href
+
+        if 'alt' in attrs:
+            alt = " alt: " + attrs['alt']
+
+        img = "(image: {src}{alt}{link})".format(
             src=attrs.get('src', ''),
-            alt=attrs.get('alt', '')
+            alt=alt,
+            link=link
         )
         self.o(img)
 
@@ -253,6 +259,10 @@ class HTML2Kirby(HTMLParser):
         self.state_start(tag, attrs)
 
     def process_end_a(self, tag):
+        if not len(self.states):
+            # link was removed. Probably because it's an image link
+            return
+
         state = self.state_end()
 
         href = state['attrs'].get('href', '')
