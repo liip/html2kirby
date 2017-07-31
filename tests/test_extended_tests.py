@@ -1,11 +1,16 @@
 import pytest
 import glob
+import os
 
 from html2kirby import HTML2Kirby
 
 files = []
 
-for f in glob.glob("extended_tests/*.html"):
+path = os.path.dirname(os.path.abspath(__file__))
+
+extended_tests_path = os.path.join(path, "extended_tests/*.html")
+
+for f in glob.glob(extended_tests_path):
     html = f
     txt = f.replace(".html", ".txt")
 
