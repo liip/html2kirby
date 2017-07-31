@@ -1,0 +1,35 @@
+Some <code>inline code</code>.
+
+Some extended code:
+
+<code>
+    fix_everything()
+</code>
+
+
+Some code right after text:<code>import fix_everything, save_world()
+
+fix_everything()
+save_world()
+
+</code>
+
+
+Real example:
+
+<code>
+    def handle_endtag(self, tag):
+        """Handle the starttag
+
+        See if we have a handler for given tag. If so, call it's end
+        function
+        """
+        if tag in self.tag_map:
+            processor = self.tag_map[tag]
+            processor_func = "process_end_{}".format(processor)
+            if hasattr(self, processor_func):
+                getattr(self, processor_func)(tag)
+
+        elif tag in self.keep_tags:
+            self.keep_end_tag(tag)
+</code>
