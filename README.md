@@ -1,5 +1,7 @@
 # HTML2Kirby
 
+[![Build Status](https://travis-ci.org/liip/html2kirby.svg?branch=master)](https://travis-ci.org/liip/html2kirby)
+
 This is a html to [Kirbytext](https://getkirby.com/docs/content/text#links) 
 converter for python.
 
