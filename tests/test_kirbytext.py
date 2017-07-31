@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 
 def test_img(formatter):
@@ -204,6 +205,8 @@ def test_keep_strike(formatter):
     assert code == formatter.kirbytext
 
 
+@pytest.mark.skipif(sys.version_info < (3,5),
+                    reason="Only works in 3.5 upwards")
 def test_unescape(formatter):
     formatter.feed("GottaGo &#8211; iPhone bring me home")
 
@@ -215,7 +218,6 @@ def test_apostrophe(formatter):
     text = "I'm `proud' to present one of the first swiss-made native iPhone applications, called `<strong>GottaGo</strong>'"  # noqa: E501
 
     formatter.feed(text)
-
 
     exp = "I'm 'proud' to present one of the first swiss-made native iPhone applications, called ' **GottaGo** '"  # noqa: E501
 
