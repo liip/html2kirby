@@ -6,6 +6,41 @@ __all__ = ["HTML2Kirby"]
 
 
 class HTML2Kirby(HTMLParser):
+    tag_map = {
+        'b': 'strong',
+        'strong': 'strong',
+        'h1': 'heading',
+        'h2': 'heading',
+        'h3': 'heading',
+        'h4': 'heading',
+        'h5': 'heading',
+        'h6': 'heading',
+        'img': 'img',
+        'br': 'br',
+        'i': 'emph',
+        'em': 'emph',
+        'p': 'p',
+        'a': 'a',
+        'ul': 'list',
+        'ol': 'list',
+        'li': 'li',
+        'code': 'pre',
+        'pre': 'pre',
+        'blockquote': 'quote'
+    }
+
+    keep_tags = {
+        'table',
+        'tr',
+        'td',
+        'th',
+        'tbody',
+        'thead',
+        'strike',
+        'u',
+        'abbr'
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -18,40 +53,6 @@ class HTML2Kirby(HTMLParser):
         self.log = logging.getLogger()
 
         self.states = []
-
-        self.tag_map = {
-            'b': 'strong',
-            'strong': 'strong',
-            'h1': 'heading',
-            'h2': 'heading',
-            'h3': 'heading',
-            'h4': 'heading',
-            'h5': 'heading',
-            'h6': 'heading',
-            'img': 'img',
-            'br': 'br',
-            'i': 'emph',
-            'em': 'emph',
-            'p': 'p',
-            'a': 'a',
-            'ul': 'list',
-            'ol': 'list',
-            'li': 'li',
-            'code': 'pre',
-            'pre': 'pre',
-            'blockquote': 'quote'
-        }
-
-        self.keep_tags = {
-            'table',
-            'tr',
-            'td',
-            'th',
-            'tbody',
-            'thead',
-            'strike',
-            'u'
-        }
 
     def _reset(self):
         self.__init__()
