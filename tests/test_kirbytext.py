@@ -203,3 +203,10 @@ def test_keep_strike(formatter):
     formatter.feed(code)
 
     assert code == formatter.markdown
+
+
+def test_unescape(formatter):
+    formatter.feed("GottaGo &#8211; iPhone bring me home")
+
+    exp = "GottaGo – iPhone bring me home"
+    assert exp == formatter.markdown

@@ -1,5 +1,5 @@
 import logging
-
+from html import unescape
 from html.parser import HTMLParser
 
 __all__ = ["HTML2Kirby"]
@@ -99,6 +99,9 @@ class HTML2Kirby(HTMLParser):
         """
         if len(data.strip()) == 0:
             return
+
+        data = unescape(data)
+
         if len(self.states) == 0:
             self.o(data)
         else:
