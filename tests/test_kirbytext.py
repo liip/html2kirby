@@ -209,3 +209,14 @@ def test_unescape(formatter):
 
     exp = "GottaGo – iPhone bring me home"
     assert exp == formatter.markdown
+
+
+def test_apostrophe(formatter):
+    text = "I'm `proud' to present one of the first swiss-made native iPhone applications, called `<strong>GottaGo</strong>'"  # noqa: E501
+
+    formatter.feed(text)
+
+
+    exp = "I'm 'proud' to present one of the first swiss-made native iPhone applications, called ' **GottaGo** '"  # noqa: E501
+
+    assert exp == formatter.markdown
