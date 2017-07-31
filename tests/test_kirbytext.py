@@ -160,22 +160,21 @@ def test_blocks(formatter):
     exp = """
 
 
-        ```
+```
             from winterfell import jon
 
             assert jon.knows == "nothing"
-        ```
+```
 
 """
 
     assert exp.strip() == formatter.markdown.strip()
 
 
-@pytest.mark.xfail(reason="Inline code not formatted correctly ATM")
 def test_code(formatter):
     formatter.feed("""<code>git blame</code>""")
 
-    exp = "```git blame```"
+    exp = "`git blame`"
 
     assert exp == formatter.markdown
 
