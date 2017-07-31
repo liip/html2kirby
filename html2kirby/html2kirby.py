@@ -37,7 +37,9 @@ class HTML2Kirby(HTMLParser):
             'ul': 'list',
             'ol': 'list',
             'li': 'li',
-            'pre': 'pre'
+            'code': 'pre',
+            'pre': 'pre',
+            'blockquote': 'quote'
         }
 
     def _reset(self):
@@ -272,4 +274,17 @@ class HTML2Kirby(HTMLParser):
 
     def process_end_pre(self, tag):
         self.o('```')
+        self.p()
+
+    def process_start_quote(self, tag, attrs):
+        self.state_start(tag, attrs)
+
+    def process_end_quote(self, tag):
+        self.p()
+        state = self.state_end()
+        data = state['data'].strip()
+
+        for line in data.split("\n"):
+            self.o("> " + line.strip() + "\n")
+
         self.p()

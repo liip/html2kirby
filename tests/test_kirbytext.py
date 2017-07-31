@@ -170,3 +170,21 @@ def test_code(formatter):
     exp = "```git blame```"
 
     assert exp == formatter.markdown
+
+
+def test_quotes(formatter):
+    formatter.feed("""
+    <blockquote>
+        Welcome. Welcome to City 17.
+        You have chosen or been chosen to relocate into one of our
+        finest remaining urban centres
+    </blockquote>
+    """)
+
+    exp = """> Welcome. Welcome to City 17.
+> You have chosen or been chosen to relocate into one of our
+> finest remaining urban centres
+
+"""
+
+    assert exp == formatter.markdown
