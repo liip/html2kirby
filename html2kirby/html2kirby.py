@@ -42,6 +42,17 @@ class HTML2Kirby(HTMLParser):
             'blockquote': 'quote'
         }
 
+        self.keep_tags = {
+            'table',
+            'tr',
+            'td',
+            'th',
+            'tbody',
+            'thead',
+            'strike',
+            'u'
+        }
+
     def _reset(self):
         self.__init__()
 
@@ -55,6 +66,8 @@ class HTML2Kirby(HTMLParser):
             processor = self.tag_map[tag]
             processor_func = "process_start_{}".format(processor)
             getattr(self, processor_func)(tag, attrs)
+        elif tag in self.keep_tags:
+            self.keep_start_tag(tag, attrs)
 
     def handle_endtag(self, tag):
         """Handle the starttag
@@ -67,6 +80,9 @@ class HTML2Kirby(HTMLParser):
             processor_func = "process_end_{}".format(processor)
             if hasattr(self, processor_func):
                 getattr(self, processor_func)(tag)
+
+        elif tag in self.keep_tags:
+            self.keep_end_tag(tag)
 
     def handle_data(self, data):
         """Handle data
@@ -158,6 +174,15 @@ class HTML2Kirby(HTMLParser):
             self.markdown += data
         else:
             self.state_add_data(data)
+
+    def keep_start_tag(self, tag, attrs):
+        attrs = ['{}="{}"'.format(*a) for a in attrs]
+        attr_str = " " + " ".join(attrs) if len(attrs) else ""
+        fmt = "<{tag}{attrs}>".format(tag=tag, attrs=attr_str)
+        self.o(fmt)
+
+    def keep_end_tag(self, tag):
+        self.o("</{}>".format(tag))
 
     def br(self):
         """Newlines!"""

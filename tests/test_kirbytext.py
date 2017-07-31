@@ -188,3 +188,10 @@ def test_quotes(formatter):
 """
 
     assert exp == formatter.markdown
+
+
+def test_keep_strike(formatter):
+    code = """<strike>fu</strike>"""
+    formatter.feed(code)
+
+    assert code == formatter.markdown
