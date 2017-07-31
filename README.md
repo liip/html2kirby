@@ -10,6 +10,8 @@ It is currently in heavy development.
 
 ## Installation
 
+HTML2Kirby is tested and suported from Python 3.4 upwards
+
 TBD
 
 ## Usage
@@ -48,5 +50,33 @@ As of now, following tags are supported:
 * Images (`<img>`)
 * line breaks (`<br>`)
 * Paragraphs (`<p>`)
-* Blocks (`<pre>`)
+* Blocks (`<pre>`, `<code>`, `<blockquote>`)
 * Links (`<a>`)
+* Horizontal rulers (`<hr>`)
+* Lists (`<ul>`, `<ol>`, `<li>`)
+
+
+### Passed markup
+
+Markup tags that aren't implemented are just dropped except for following tags:
+
+
+* table
+* tr
+* td
+* th
+* tbody
+* thead
+* strike
+* u
+* abbr
+* del
+
+They will just be kept in the Kirbytext which should result in a valid output.
+
+
+## Issues
+
+In python3.4, the ![unescape](https://docs.python.org/3/library/html.html?highlight=html#html.unescape)
+doesn't quite convert all of the html 5 escaped characters such as &#8211;
+(en dash).
