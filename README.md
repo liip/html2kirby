@@ -1,6 +1,7 @@
 # HTML2Kirby
 
-[![Build Status](https://travis-ci.org/liip/html2kirby.svg?branch=master)](https://travis-ci.org/liip/html2kirby)
+[![Build Status](https://travis-ci.org/liip/html2kirby.svg?branch=master)](https://travis-ci.org/liip/html2kirby) [![codecov](https://codecov.io/gh/liip/html2kirby/branch/master/graph/badge.svg)](https://codecov.io/gh/liip/html2kirby)
+
 
 This is a html to [Kirbytext](https://getkirby.com/docs/content/text#links) 
 converter for python.
