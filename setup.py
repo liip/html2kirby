@@ -1,4 +1,7 @@
 from distutils.core import setup
+
+python_requires = '>3.4'
+
 setup(
   name = 'html2kirby',
   packages = ['html2kirby'],
