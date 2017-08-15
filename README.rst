@@ -14,7 +14,11 @@ Installation
 
 HTML2Kirby is tested and suported from Python 3.4 upwards
 
-TBD
+Install via pip:
+
+::
+
+    pip install html2kirby
 
 Usage
 -----
