@@ -80,6 +80,7 @@ following tags:
 -  u
 -  abbr
 -  del
+-  svg
 
 They will just be kept in the Kirbytext which should result in a valid
 output.

@@ -40,8 +40,14 @@ class HTML2Kirby(HTMLParser):
         'strike',
         'u',
         'abbr',
-        'del'
+        'del',
     ]
+
+    passthrough_tags = (
+        'svg',
+    )
+
+    is_passthrough = False
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -71,7 +77,13 @@ class HTML2Kirby(HTMLParser):
             getattr(self, processor_func)(tag, attrs)
         elif tag in self.keep_tags:
             self.keep_start_tag(tag, attrs)
+        elif tag in self.passthrough_tags:
+            self.enable_passthrough_mode()
+            self.o(self.tag_to_html(tag, attrs))
         else:
+            if self.is_passthrough:
+                self.o(self.tag_to_html(tag, attrs))
+
             print("Ignored tag {} with attrs {}".format(
                 tag, ",".join(["{}: {}".format(*a) for a in attrs])
             ))
@@ -91,6 +103,13 @@ class HTML2Kirby(HTMLParser):
         elif tag in self.keep_tags:
             self.keep_end_tag(tag)
 
+        elif tag in self.passthrough_tags:
+            self.o(self.end_tag_to_html(tag))
+            self.disable_passthrough_mode()
+
+        if self.is_passthrough:
+            self.o(self.end_tag_to_html(tag))
+
     def handle_data(self, data):
         """Handle data
 
@@ -98,6 +117,9 @@ class HTML2Kirby(HTMLParser):
         If we're just plain rewriting, append the data to the result.
         If we have some sort of state, append the data to that state.
         """
+        if self.is_passthrough:
+            self.o(data)
+
         if len(data.strip()) == 0:
             return
 
@@ -194,14 +216,27 @@ class HTML2Kirby(HTMLParser):
         else:
             self.state_add_data(data)
 
-    def keep_start_tag(self, tag, attrs):
+    def tag_to_html(self, tag, attrs):
+        """Convert tag and attr data back to html
+
+        This is used for keeping tags or even passthrough mode
+        """
         attrs = ['{}="{}"'.format(*a) for a in attrs]
         attr_str = " " + " ".join(attrs) if len(attrs) else ""
         fmt = "<{tag}{attrs}>".format(tag=tag, attrs=attr_str)
+
+        return fmt
+
+    def end_tag_to_html(self, tag):
+        """Format an end tag (</TAGNAME>)"""
+        return "</{}>".format(tag)
+
+    def keep_start_tag(self, tag, attrs):
+        fmt = self.tag_to_html(tag, attrs)
         self.o(fmt)
 
     def keep_end_tag(self, tag):
-        self.o("</{}>".format(tag))
+        self.o(self.end_tag_to_html(tag))
 
     def br(self):
         """Newlines!"""
@@ -356,3 +391,10 @@ class HTML2Kirby(HTMLParser):
         self.p()
         self.o("***")
         self.p()
+
+    def enable_passthrough_mode(self):
+        self.is_passthrough = True
+
+
+    def disable_passthrough_mode(self):
+        self.is_passthrough = False

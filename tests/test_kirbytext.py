@@ -230,3 +230,19 @@ def test_horizontal_ruler(formatter):
     exp = "\n\n***\n\n"
 
     assert exp == formatter.kirbytext
+
+
+def test_code_enclosed_svg(formatter):
+    formatter.feed("<code><svg></svg></code>")
+
+    exp = "`<svg></svg>`"
+
+    assert exp == formatter.kirbytext
+
+
+def test_code_enclosed_svg_attrs(formatter):
+    formatter.feed("""<code><svg preserveaspectratio="xMinYmin" version="1.1"></svg></code>""")
+
+    exp = """`<svg preserveaspectratio="xMinYmin" version="1.1"></svg>`"""
+
+    assert exp == formatter.kirbytext
