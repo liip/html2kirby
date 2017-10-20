@@ -456,6 +456,5 @@ class HTML2Kirby(HTMLParser):
     def enable_passthrough_mode(self):
         self.is_passthrough = True
 
-
     def disable_passthrough_mode(self):
         self.is_passthrough = False

@@ -37,6 +37,7 @@ def test_headings_begining_of_line(formatter):
 
     assert formatter.kirbytext.strip() == "**strong** \n# Heading"
 
+
 def test_strong(formatter):
     formatter.feed("<b>lala</b>")
     assert formatter.kirbytext == "**lala** "
@@ -211,7 +212,7 @@ def test_keep_strike(formatter):
     assert code == formatter.kirbytext
 
 
-@pytest.mark.skipif(sys.version_info < (3,5),
+@pytest.mark.skipif(sys.version_info < (3, 5),
                     reason="Only works in 3.5 upwards")
 def test_unescape(formatter):
     formatter.feed("GottaGo &#8211; iPhone bring me home")
@@ -247,7 +248,7 @@ def test_code_enclosed_svg(formatter):
 
 
 def test_code_enclosed_svg_attrs(formatter):
-    formatter.feed("""<code><svg preserveaspectratio="xMinYmin" version="1.1"></svg></code>""")
+    formatter.feed("""<code><svg preserveaspectratio="xMinYmin" version="1.1"></svg></code>""")  # noqa: E501
 
     exp = """`<svg preserveaspectratio="xMinYmin" version="1.1"></svg>`"""
 
@@ -255,7 +256,7 @@ def test_code_enclosed_svg_attrs(formatter):
 
 
 def test_pre_block_no_single_line(formatter):
-    """Pre blocks must not be converted to one-liners, even if 
+    """Pre blocks must not be converted to one-liners, even if
     they are in the source"""
 
     formatter.feed("""<pre>foo bar</pre>""")
@@ -357,4 +358,3 @@ There are rules<br/></em> Text goes on""")
 _There are rules_ Text goes on"""
 
     assert exp.strip() == formatter.kirbytext.strip()
-

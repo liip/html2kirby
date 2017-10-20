@@ -9,5 +9,6 @@ python:
 install: "pip install -r requirements.txt"
 # command to run tests
 script:
+    - flake8
     - pytest --cov=html2kirby
     - codecov --token 581ab519-95fa-45cc-b792-47f13e71fcee
