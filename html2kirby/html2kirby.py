@@ -371,8 +371,9 @@ class HTML2Kirby(HTMLParser):
     def process_end_pre(self, tag):
         state = self.state_end()
 
-        if len(state['data'].split("\n")) > 1:
-            # multiline code
+        if tag == 'pre' or len(state['data'].split("\n")) > 1:
+            # Either multiline code or <pre> code
+            # We always want triple backticks for <pre> code
             self.p()
             self.o('```\n')
             self.o(state['data'].rstrip().strip('\n'))

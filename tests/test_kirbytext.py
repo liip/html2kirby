@@ -252,3 +252,18 @@ def test_code_enclosed_svg_attrs(formatter):
     exp = """`<svg preserveaspectratio="xMinYmin" version="1.1"></svg>`"""
 
     assert exp == formatter.kirbytext
+
+
+def test_pre_block_no_single_line(formatter):
+    """Pre blocks must not be converted to one-liners, even if 
+    they are in the source"""
+
+    formatter.feed("""<pre>foo bar</pre>""")
+
+    exp = """
+```
+foo bar
+```
+        """
+
+    assert exp.strip() == formatter.kirbytext.strip()
