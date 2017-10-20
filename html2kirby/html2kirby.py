@@ -25,6 +25,7 @@ class HTML2Kirby(HTMLParser):
         'ol': 'list',
         'li': 'li',
         'code': 'pre',
+        'pre': 'pre',
         'blockquote': 'quote',
         'hr': 'hr'
     }
@@ -40,7 +41,6 @@ class HTML2Kirby(HTMLParser):
         'u',
         'abbr',
         'del',
-        'pre'
     ]
 
     passthrough_tags = (
