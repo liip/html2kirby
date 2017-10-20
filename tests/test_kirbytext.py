@@ -31,6 +31,12 @@ def test_headings(formatter, html, md):
     assert formatter.kirbytext == "{} Heading uno\n\n".format(md)
 
 
+def test_headings_begining_of_line(formatter):
+    """Make sure the heading is on a new line"""
+    formatter.feed('<strong>strong</strong><h1>Heading</h1>')
+
+    assert formatter.kirbytext.strip() == "**strong** \n# Heading"
+
 def test_strong(formatter):
     formatter.feed("<b>lala</b>")
     assert formatter.kirbytext == "**lala** "
