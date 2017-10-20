@@ -281,3 +281,80 @@ pip install html2kirby
     """
 
     assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_useless_newlines_in_strong(formatter):
+    """Test the case when a <strong> tag ends with a <br /> tag
+    which is totally useless
+    """
+
+    formatter.feed("""<strong>This is not 'Nam. This is bowling. There are rules<br/></strong>""")  # noqa: E501
+
+    exp = """**This is not 'Nam. This is bowling. There are rules**"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_ok_newlines_in_strong(formatter):
+    """Test the case where there actually are senseful newlines in strong"""
+
+    formatter.feed("""<strong>This is not 'Nam. This is bowling.<br />
+There are rules<br/></strong>""")
+
+    # ** tags are padded with whitespace, which is why we add it here
+    exp = """**This is not 'Nam. This is bowling.**\u0020
+**There are rules**"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_ok_newlines_in_strong2(formatter):
+    """Test the case where there actually are senseful newlines in strong"""
+
+    formatter.feed("""<strong>This is not 'Nam. This is bowling.<br />
+There are rules<br/></strong> Text goes on""")
+
+    # ** tags are padded with whitespace, which is why we add it here
+    exp = """**This is not 'Nam. This is bowling.**\u0020
+**There are rules** Text goes on"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_useless_newlines_in_em(formatter):
+    """Test the case when a <em> tag ends with a <br /> tag
+    which is totally useless
+    """
+
+    formatter.feed("""<em>This is not 'Nam. This is bowling. There are rules<br/></em>""")  # noqa: E501
+
+    exp = """_This is not 'Nam. This is bowling. There are rules_"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_ok_newlines_in_em(formatter):
+    """Test the case where there actually are senseful newlines in em"""
+
+    formatter.feed("""<em>This is not 'Nam. This is bowling.<br />
+There are rules<br/></em>""")
+
+    # _ tags are padded with whitespace, which is why we add it here
+    exp = """_This is not 'Nam. This is bowling._
+_There are rules_"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_ok_newlines_in_em2(formatter):
+    """Test the case where there actually are senseful newlines in em"""
+
+    formatter.feed("""<em>This is not 'Nam. This is bowling.<br />
+There are rules<br/></em> Text goes on""")
+
+    # _ tags are padded with whitespace, which is why we add it here
+    exp = """_This is not 'Nam. This is bowling._
+_There are rules_ Text goes on"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+

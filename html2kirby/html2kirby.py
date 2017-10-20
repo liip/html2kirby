@@ -299,19 +299,55 @@ class HTML2Kirby(HTMLParser):
         self.p()
 
     def process_start_strong(self, tag, attrs):
-        self.tag_pad()
-        self.o('**')
+        self.state_start(tag, attrs)
 
     def process_end_strong(self, tag):
-        self.o('**')
-        self.tag_pad()
+        """Convert strong tags (strong, b)
+
+        Print strong tags as is, except if they contain newlines. If they
+        contain newlines, print each line surrounded by ** tags.
+        Strip newlines at the beginning or the end, like <b>abc\n</b>
+        """
+        state = self.state_end()
+        data = state['data']
+
+        lines = [line for line in data.split('\n') if line != '']
+
+        for key, line in enumerate(lines):
+            self.tag_pad()
+            self.o('**')
+            self.o(line.strip('\n'))
+            self.o('**')
+            self.tag_pad()
+
+            # avoid adding a newline afterwards if this is the last line
+            if key < len(lines) - 1:
+                self.o("\n")
 
     def process_start_emph(self, tag, attrs):
-        self.tag_pad()
-        self.o('_')
+        self.state_start(tag, attrs)
 
     def process_end_emph(self, tag):
-        self.o('_')
+        """Convert emphasis tags (em, i)
+
+        Print emph tags as is, except if they contain newlines. If they
+        contain newlines, print each line surrounded by _ tags.
+        Strip newlines at the beginning or the end, like <i>abc\n</i>
+        """
+        state = self.state_end()
+        data = state['data']
+
+        lines = [line for line in data.split('\n') if line != '']
+
+        for key, line in enumerate(lines):
+            self.tag_pad()
+            self.o('_')
+            self.o(line.strip('\n'))
+            self.o('_')
+
+            # avoid adding a newline afterwards if this is the last line
+            if key < len(lines) - 1:
+                self.o("\n")
 
     def process_start_p(self, tag, attrs):
         self.p()
