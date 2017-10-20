@@ -59,7 +59,7 @@ As of now, following tags are supported:
 -  Images (``<img>``)
 -  line breaks (``<br>``)
 -  Paragraphs (``<p>``)
--  Blocks (``<pre>``, ``<code>``, ``<blockquote>``)
+-  Blocks (``<pre>``, ``<code>``, ``<blockquote>``, ``<pre><code>``)
 -  Links (``<a>``)
 -  Horizontal rulers (``<hr>``)
 -  Lists (``<ul>``, ``<ol>``, ``<li>``)

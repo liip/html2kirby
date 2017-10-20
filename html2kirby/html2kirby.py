@@ -190,6 +190,14 @@ class HTML2Kirby(HTMLParser):
         """
         return self.states.pop()
 
+    def state_peek(self):
+        """Have a look at the current state without removing it"""
+        return self.states[-1]
+
+    def state_exists(self):
+        """Return if there's a saved state"""
+        return len(self.states) > 0
+
     def p(self):
         """Create blank lines
 
@@ -371,12 +379,20 @@ class HTML2Kirby(HTMLParser):
     def process_end_pre(self, tag):
         state = self.state_end()
 
-        if tag == 'pre' or len(state['data'].split("\n")) > 1:
+        def print_data(data):
+            self.o(state['data'].rstrip().strip('\n'))
+
+        if self.state_exists() and self.state_peek()['tag'] == 'pre':
+            # seems like we're in a <pre><code> state here (or <pre><pre>)
+            # Therefore, we don't add another tag
+            print_data(state['data'])
+
+        elif tag == 'pre' or len(state['data'].split("\n")) > 1:
             # Either multiline code or <pre> code
             # We always want triple backticks for <pre> code
             self.p()
             self.o('```\n')
-            self.o(state['data'].rstrip().strip('\n'))
+            print_data(state['data'])
             self.o('\n```')
             self.p()
 

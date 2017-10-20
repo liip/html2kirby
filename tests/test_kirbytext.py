@@ -267,3 +267,17 @@ foo bar
         """
 
     assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_pre_code_block(formatter):
+    """Test that <pre><code> blocks only convert to one back tick triple"""
+
+    formatter.feed("""<pre><code>pip install html2kirby</code></pre>""")
+
+    exp = """
+```
+pip install html2kirby
+```
+    """
+
+    assert exp.strip() == formatter.kirbytext.strip()
