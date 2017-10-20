@@ -157,6 +157,13 @@ class HTML2Kirby(HTMLParser):
             if not self.kirbytext.endswith(' '):
                 self.o(' ')
 
+    def tag_start_of_line(self):
+        """Make sure the tag is at the begininig of a line"""
+
+        if len(self.kirbytext):
+            if self.kirbytext[-1] != "\n":
+                self.o("\n")
+
     def state_start(self, tag, attrs):
         """Record a state
 
@@ -277,6 +284,7 @@ class HTML2Kirby(HTMLParser):
         data = state['data'].strip()
 
         nr = int("".join(c for c in tag if c.isdigit()))
+        self.tag_start_of_line()
         self.o("#" * nr)
         self.o(" ")
         self.o(data)
