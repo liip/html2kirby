@@ -153,7 +153,7 @@ def test_ordered_list(formatter):
     assert exp == formatter.kirbytext.strip()
 
 
-def test_pre_blocks(formatter):
+def test_blocks(formatter):
     """TODO: improve this test with the newlines
     """
     formatter.feed("""
@@ -165,11 +165,14 @@ def test_pre_blocks(formatter):
     """)
 
     exp = """
-        <pre>
+
+
+```
             from winterfell import jon
 
             assert jon.knows == "nothing"
-        </pre>
+```
+
 """
 
     assert exp.strip() == formatter.kirbytext.strip()
