@@ -359,7 +359,7 @@ class HTML2Kirby(HTMLParser):
         self.state_start(tag, attrs)
 
     def process_end_a(self, tag):
-        if not len(self.states):
+        if not self.state_exists() or self.state_peek()['tag'] != 'a':
             # link was removed. Probably because it's an image link
             return
 

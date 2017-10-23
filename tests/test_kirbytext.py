@@ -21,6 +21,14 @@ def test_linked_image(formatter):
     assert formatter.kirbytext == exp
 
 
+def test_wrapped_linked_image(formatter):
+    formatter.feed('<strong><a href="http://liip.com"><img src="liiplogo.jpg"></a></strong>')  # noqa: E501
+
+    exp = "**(image: liiplogo.jpg link: http://liip.com)**"
+
+    assert formatter.kirbytext.strip() == exp.strip()
+
+
 @pytest.mark.parametrize("html,md", [
     ('h1', '#'), ('h2', '##'), ('h3', '###'),
     ('h4', '####'), ('h5', '#####'), ('h6', '######'),
