@@ -5,6 +5,43 @@ from html.parser import HTMLParser
 __all__ = ["HTML2Kirby"]
 
 
+class StackEntry:
+    def __init__(self, tag, attrs):
+        self.tag = tag
+        self.attrs = attrs
+        self.data = ''
+
+    def add_data(self, data):
+        self.data += data
+
+
+class TagStack(list):
+    def push(self, tag, attrs):
+        """Record a tag
+
+        We're in some sort of state, meaning that we're inside a tag.
+        An example for that is the <a> tag, which we can only
+        write after encountering the end tag, since the link text
+        is inbetween
+        """
+        self.append(StackEntry(tag=tag, attrs=dict(attrs)))
+
+    def add_data(self, data):
+        """Add data to the current state we're in"""
+        last = self.peek()
+        last.data += data
+
+    def peek(self):
+        """Have a look at the current state without removing it"""
+        return self[-1]
+
+    def pop(self):
+        return super().pop()
+
+    def is_empty(self):
+        return len(self) == 0
+
+
 class HTML2Kirby(HTMLParser):
     tag_map = {
         'b': 'strong',
@@ -60,7 +97,7 @@ class HTML2Kirby(HTMLParser):
                                  if t.startswith("process_start_")]
         self.log = logging.getLogger()
 
-        self.states = []
+        self.tag_stack = TagStack()
 
     def _reset(self):
         self.__init__()
@@ -130,14 +167,14 @@ class HTML2Kirby(HTMLParser):
 
         # those need to be replaced, as ` means code block in kirby
 
-        if len(self.states) == 0:
+        if self.tag_stack.is_empty():
             self.o(data)
         else:
-            if self.states[-1]['tag'] == 'li':
+            if self.tag_stack.peek().tag == 'li':
                 # special case here, the data of li needs to be stripped
                 # in order to work correctly
                 data = data.strip()
-            self.state_add_data(data)
+            self.tag_stack.add_data(data)
 
     def tag_pad(self):
         """Pad a tag
@@ -145,11 +182,11 @@ class HTML2Kirby(HTMLParser):
         Put whitespace around tags, but not at the beginning of the
         string or line. This is necessary with some tags as _
         """
-        if len(self.states):
-            last = self.states[-1]
+        if not self.tag_stack.is_empty():
+            last = self.tag_stack.peek()
 
-            if not last['data'].endswith(' '):
-                last['data'] += ' '
+            if not last.data.endswith(' '):
+                last.data += ' '
         else:
             if self.kirbytext == '' or self.kirbytext[-1] == "\n":
                 return
@@ -164,59 +201,25 @@ class HTML2Kirby(HTMLParser):
             if self.kirbytext[-1] != "\n":
                 self.o("\n")
 
-    def state_start(self, tag, attrs):
-        """Record a state
-
-        We're in some sort of state, push that to the stack.
-        An example for that is the <a> tag, which we can only
-        write after encountering the end tag, since the link text
-        is inbetween
-        """
-        self.states.append({
-            'tag': tag,
-            'attrs': dict(attrs),
-            'data': ''
-        })
-
-    def state_add_data(self, data):
-        """Add data to the current state we're in"""
-        last = self.states[-1]
-        last['data'] += data
-
-    def state_end(self):
-        """End a state
-
-        This means that the end tag has been encountered
-        """
-        return self.states.pop()
-
-    def state_peek(self):
-        """Have a look at the current state without removing it"""
-        return self.states[-1]
-
-    def state_exists(self):
-        """Return if there's a saved state"""
-        return len(self.states) > 0
-
     def p(self):
         """Create blank lines
 
         Create blank lines, but only if they don't exist. This makes sure that
         in the right places, there are two new lines
         """
-        if len(self.states) == 0:
+        if self.tag_stack.is_empty():
             if not self.kirbytext.endswith("\n\n"):
                 if self.kirbytext.endswith("\n"):
                     self.kirbytext += "\n"
                 else:
                     self.kirbytext += "\n\n"
         else:
-            last = self.states[-1]
-            if not last['data'].endswith("\n\n"):
-                if last['data'].endswith("\n"):
-                    last['data'] += "\n"
+            last = self.tag_stack.peek()
+            if not last.data.endswith("\n\n"):
+                if last.data.endswith("\n"):
+                    last.data += "\n"
                 else:
-                    last['data'] += "\n\n"
+                    last.data += "\n\n"
 
     def o(self, data):
         """Append data to the result or state
@@ -224,12 +227,12 @@ class HTML2Kirby(HTMLParser):
         Append the data to the result if we're plainly rewriting, else
         append it to the current state
         """
-        if len(self.states) == 0:
+        if self.tag_stack.is_empty():
             if self.kirbytext.endswith(' ') and data.startswith(' '):
                 data = data.lstrip()
             self.kirbytext += data
         else:
-            self.state_add_data(data)
+            self.tag_stack.add_data(data)
 
     def tag_to_html(self, tag, attrs):
         """Convert tag and attr data back to html
@@ -265,10 +268,10 @@ class HTML2Kirby(HTMLParser):
 
         link = ""
         alt = ""
-        if len(self.states) and self.states[-1]['tag'] == 'a':
+        if not self.tag_stack.is_empty() and self.tag_stack.peek().tag == 'a':
             # we're in a link. Remove that and append the src in the image tag
-            link_state = self.state_end()
-            href = link_state['attrs'].get('href', '')
+            link_state = self.tag_stack.pop()
+            href = link_state.attrs.get('href', '')
 
             link = " link: " + href
 
@@ -283,13 +286,13 @@ class HTML2Kirby(HTMLParser):
         self.o(img)
 
     def process_start_heading(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_heading(self, tag):
-        state = self.state_end()
+        state = self.tag_stack.pop()
 
-        tag = state['tag']
-        data = state['data'].strip()
+        tag = state.tag
+        data = state.data.strip()
 
         nr = int("".join(c for c in tag if c.isdigit()))
         self.tag_start_of_line()
@@ -299,7 +302,7 @@ class HTML2Kirby(HTMLParser):
         self.p()
 
     def process_start_strong(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_strong(self, tag):
         """Convert strong tags (strong, b)
@@ -308,8 +311,8 @@ class HTML2Kirby(HTMLParser):
         contain newlines, print each line surrounded by ** tags.
         Strip newlines at the beginning or the end, like <b>abc\n</b>
         """
-        state = self.state_end()
-        data = state['data']
+        state = self.tag_stack.pop()
+        data = state.data
 
         lines = [line for line in data.split('\n') if line != '']
 
@@ -325,7 +328,7 @@ class HTML2Kirby(HTMLParser):
                 self.o("\n")
 
     def process_start_emph(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_emph(self, tag):
         """Convert emphasis tags (em, i)
@@ -334,8 +337,8 @@ class HTML2Kirby(HTMLParser):
         contain newlines, print each line surrounded by _ tags.
         Strip newlines at the beginning or the end, like <i>abc\n</i>
         """
-        state = self.state_end()
-        data = state['data']
+        state = self.tag_stack.pop()
+        data = state.data
 
         lines = [line for line in data.split('\n') if line != '']
 
@@ -356,20 +359,20 @@ class HTML2Kirby(HTMLParser):
         self.p()
 
     def process_start_a(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_a(self, tag):
-        if not self.state_exists() or self.state_peek()['tag'] != 'a':
+        if self.tag_stack.is_empty() or self.tag_stack.peek().tag != 'a':
             # link was removed. Probably because it's an image link
             return
 
-        state = self.state_end()
+        state = self.tag_stack.pop()
 
-        href = state['attrs'].get('href', '')
+        href = state.attrs.get('href', '')
 
-        title = (" title: " + state['attrs']['title']
-                 if 'title' in state['attrs'] else "")
-        text = "text: " + state['data'].strip()
+        title = (" title: " + state.attrs['title']
+                 if 'title' in state.attrs else "")
+        text = "text: " + state.data.strip()
 
         link = "(link: {href}{title} {text})".format(
             href=href, title=title, text=text
@@ -379,15 +382,15 @@ class HTML2Kirby(HTMLParser):
         self.o(link)
 
     def process_start_list(self, tag, attrs):
-        nest_level = len([s for s in self.states if s['tag'] == 'ul'])
+        nest_level = len([s for s in self.tag_stack if s.tag == 'ul'])
 
         attrs.append(('nest_level', nest_level))
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_list(self, tag):
-        state = self.state_end()
+        state = self.tag_stack.pop()
 
-        nest_level = state['attrs']['nest_level']
+        nest_level = state.attrs['nest_level']
         indent = " " * 4 * nest_level
 
         if nest_level == 0:
@@ -395,53 +398,54 @@ class HTML2Kirby(HTMLParser):
         else:
             self.o("\n")
 
-        for line in state.get('data').split("\n"):
+        for line in state.data.split("\n"):
             self.o(indent + line + "\n")
 
     def process_start_li(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_li(self, tag):
-        state = self.state_end()
+        state = self.tag_stack.pop()
 
-        sign = '*' if self.states[-1]['tag'] == 'ul' else '1.'
+        sign = '*' if self.tag_stack.peek().tag == 'ul' else '1.'
 
-        self.o(sign + " " + state.get('data', '').strip())
+        self.o(sign + " " + state.data.strip())
         self.o("\n")
 
     def process_start_pre(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_pre(self, tag):
-        state = self.state_end()
+        state = self.tag_stack.pop()
 
         def print_data(data):
-            self.o(state['data'].rstrip().strip('\n'))
+            self.o(state.data.rstrip().strip('\n'))
 
-        if self.state_exists() and self.state_peek()['tag'] == 'pre':
+        if (not self.tag_stack.is_empty()
+                and self.tag_stack.peek().tag == 'pre'):
             # seems like we're in a <pre><code> state here (or <pre><pre>)
             # Therefore, we don't add another tag
-            print_data(state['data'])
+            print_data(state.data)
 
-        elif tag == 'pre' or len(state['data'].split("\n")) > 1:
+        elif tag == 'pre' or len(state.data.split("\n")) > 1:
             # Either multiline code or <pre> code
             # We always want triple backticks for <pre> code
             self.p()
             self.o('```\n')
-            print_data(state['data'])
+            print_data(state.data)
             self.o('\n```')
             self.p()
 
         else:
-            self.o("`{}`".format(state['data'].strip()))
+            self.o("`{}`".format(state.data.strip()))
 
     def process_start_quote(self, tag, attrs):
-        self.state_start(tag, attrs)
+        self.tag_stack.push(tag, attrs)
 
     def process_end_quote(self, tag):
         self.p()
-        state = self.state_end()
-        data = state['data'].strip()
+        state = self.tag_stack.pop()
+        data = state.data.strip()
 
         for line in data.split("\n"):
             self.o("> " + line.strip() + "\n")
