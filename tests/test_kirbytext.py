@@ -366,3 +366,28 @@ There are rules<br/></em> Text goes on""")
 _There are rules_ Text goes on"""
 
     assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_whitespace_after_link(formatter):
+    """Test that whitespace after a link is preserved"""
+
+    formatter.feed("""A <a href="#">link</a> helps to navigate""")
+
+    exp = """A (link: # text: link) helps to navigate"""
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_whitespace_after_link_in_list(formatter):
+    str = """<ul><li>We do some async compression of images with <a href="https://github.com
+/google/zopfli">zopflipng</a>, <a href="https://pngquant.org/">pngquant</a> and <a href="https://github.com/mozilla/mozjpeg">mozjpeg</a> to make the images even smaller bytewise.</li></ul>
+"""  # noqa: E501
+
+    formatter.feed(str)
+
+    exp = """* We do some async compression of images with (link: https://github.com
+/google/zopfli text: zopflipng), (link: https://pngquant.org/ text: pngquant) and
+(link: https://github.com/mozilla/mozjpeg text: mozjpeg) to make the images even smaller bytewise."""  # noqa: E501
+
+    assert exp.strip().replace("\n", " ") == (
+        formatter.kirbytext.strip().replace("\n", " "))

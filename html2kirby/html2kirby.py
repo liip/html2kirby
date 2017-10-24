@@ -171,9 +171,11 @@ class HTML2Kirby(HTMLParser):
             self.o(data)
         else:
             if self.tag_stack.peek().tag == 'li':
-                # special case here, the data of li needs to be stripped
-                # in order to work correctly
-                data = data.strip()
+                # a bit of black magic here:
+                # We don't want newlines in the resulting line, but we can't
+                # just use .strip() because we want to preserve white spaces
+                # when no newline is involved
+                data = "".join([d for d in data.split("\n") if len(d.strip())])
             self.tag_stack.add_data(data)
 
     def tag_pad(self):
