@@ -88,12 +88,11 @@ output.
 Issues
 ------
 
-In python3.4, the |unescape| doesn't quite convert all of the html 5
+In python 3.4, the unescape_ doesn't quite convert all of the html 5
 escaped characters such as – (en dash).
 
 .. |Build Status| image:: https://travis-ci.org/liip/html2kirby.svg?branch=master
    :target: https://travis-ci.org/liip/html2kirby
 .. |codecov| image:: https://codecov.io/gh/liip/html2kirby/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/liip/html2kirby
-.. |unescape| image:: https://docs.python.org/3/library/html.html?highlight=html#html.unescape
-
+.. _unescape: https://docs.python.org/3/library/html.html?highlight=unescape#html.unescape
