@@ -391,3 +391,30 @@ def test_whitespace_after_link_in_list(formatter):
 
     assert exp.strip().replace("\n", " ") == (
         formatter.kirbytext.strip().replace("\n", " "))
+
+
+def test_passthrough_with_mapped_tags(formatter):
+    _str = """<table><tr><td><strong>fette sache</strong></td></tr></table>"""
+
+    formatter.feed(_str)
+
+    assert _str == formatter.kirbytext
+
+
+def test_passthrough_with_mapped_tags_ending(formatter):
+    _str = """<table><tr><td><strong>fette sache</strong></td></tr></table>
+<strong>Fettere Sache</strong>"""
+
+    formatter.feed(_str)
+
+    exp = """<table><tr><td><strong>fette sache</strong></td></tr></table> **Fettere Sache**"""   # noqa: E501
+
+    assert exp.strip() == formatter.kirbytext.strip()
+
+
+def test_nested_passthrouh(formatter):
+    _str = """<table><tr><td><table><tr><td></td></tr></table></td></tr></table>"""  # noqa: E501
+
+    formatter.feed(_str)
+
+    assert _str == formatter.kirbytext

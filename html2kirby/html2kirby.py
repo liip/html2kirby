@@ -68,12 +68,6 @@ class HTML2Kirby(HTMLParser):
     }
 
     keep_tags = [
-        'table',
-        'tr',
-        'td',
-        'th',
-        'tbody',
-        'thead',
         'strike',
         'u',
         'abbr',
@@ -82,9 +76,14 @@ class HTML2Kirby(HTMLParser):
 
     passthrough_tags = (
         'svg',
+        'table'
     )
 
-    is_passthrough = False
+    _passthrough_levels = 0
+    """Passthrough mode is triggered by self.passthrough_tags and
+    will directly output this tag and all children instead of converting them
+    to kirbytext
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,25 +101,51 @@ class HTML2Kirby(HTMLParser):
     def _reset(self):
         self.__init__()
 
+    @property
+    def is_passthrough(self):
+        """Whether we're in a passthrough mode"""
+        return self._passthrough_levels > 0
+
+    def enable_passthrough_mode(self):
+        """Enable passthrough mode
+
+        Enable passthrough mode by counting the levels one up. This enables the
+        passthrough tags to be nested
+        """
+        self._passthrough_levels += 1
+
+    def disable_passthrough_mode(self):
+        """Disable passthrough mode"""
+        self._passthrough_levels -= 1
+
     def handle_starttag(self, tag, attrs):
         """Handle the starttag
 
-        See if we have a handler for given tag. If so, call it's start
-        function
+        See what category the tag is in, if it's a passthrough one, one to
+        be kept or one to be converted. Call the corresponding function.
         """
-        if tag in self.tag_map:
+        if tag in self.passthrough_tags:
+            # This is a passhtrough tag, start the passthrough,
+            self.enable_passthrough_mode()
+            self.o(self.tag_to_html(tag, attrs))
+
+        elif self.is_passthrough:
+            # We're in passthrough but this is not the tag that started it
+            # Just output the tag
+            self.o(self.tag_to_html(tag, attrs))
+
+        elif tag in self.tag_map:
+            # Normal tag that we'll rewrite
             processor = self.tag_map[tag]
             processor_func = "process_start_{}".format(processor)
             getattr(self, processor_func)(tag, attrs)
-        elif tag in self.keep_tags:
-            self.keep_start_tag(tag, attrs)
-        elif tag in self.passthrough_tags:
-            self.enable_passthrough_mode()
-            self.o(self.tag_to_html(tag, attrs))
-        else:
-            if self.is_passthrough:
-                self.o(self.tag_to_html(tag, attrs))
 
+        elif tag in self.keep_tags:
+            # Tag that we keep as is
+            self.keep_start_tag(tag, attrs)
+
+        else:
+            # Tag that we ignore
             print("Ignored tag {} with attrs {}".format(
                 tag, ",".join(["{}: {}".format(*a) for a in attrs])
             ))
@@ -128,24 +153,29 @@ class HTML2Kirby(HTMLParser):
     def handle_endtag(self, tag):
         """Handle the starttag
 
-        See if we have a handler for given tag. If so, call it's end
-        function
+        See what category the tag is in, if it's a passthrough one, one to
+        be kept or one to be converted. Call the corresponding function.
         """
-        if tag in self.tag_map:
+        if self.is_passthrough and tag in self.passthrough_tags:
+            # We're in passthrough mode and this tag started it, so
+            # we disable the passthrough mode
+            self.o(self.end_tag_to_html(tag))
+            self.disable_passthrough_mode()
+
+        elif self.is_passthrough:
+            # We're in passthrough mode, write the tag directly
+            self.o(self.end_tag_to_html(tag))
+
+        elif tag in self.tag_map:
+            # Normal tag that is converted
             processor = self.tag_map[tag]
             processor_func = "process_end_{}".format(processor)
             if hasattr(self, processor_func):
                 getattr(self, processor_func)(tag)
 
         elif tag in self.keep_tags:
+            # Tags that we keep as is
             self.keep_end_tag(tag)
-
-        elif tag in self.passthrough_tags:
-            self.o(self.end_tag_to_html(tag))
-            self.disable_passthrough_mode()
-
-        if self.is_passthrough:
-            self.o(self.end_tag_to_html(tag))
 
     def handle_data(self, data):
         """Handle data
@@ -156,6 +186,7 @@ class HTML2Kirby(HTMLParser):
         """
         if self.is_passthrough:
             self.o(data)
+            return
 
         if len(data.strip()) == 0:
             return
@@ -458,9 +489,3 @@ class HTML2Kirby(HTMLParser):
         self.p()
         self.o("***")
         self.p()
-
-    def enable_passthrough_mode(self):
-        self.is_passthrough = True
-
-    def disable_passthrough_mode(self):
-        self.is_passthrough = False
