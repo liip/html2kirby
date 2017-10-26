@@ -8,7 +8,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 setup(
   name = 'html2kirby',
   packages = ['html2kirby'],
-  version = '0.1-1',
+  version = '0.2',
   description = 'A HTML to Kirbytext converter',
   long_description=open(os.path.join(HERE, 'README.rst')).read(),
   author = 'Stefan Heinemann',
